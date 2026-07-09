@@ -9,7 +9,7 @@ random.seed(42)
 np.random.seed(42)
 
 # Constants
-REGIONS = ['Northeast', 'Southeast', 'Midwest', 'Southwest', 'West']
+REGIONS = ['North', 'South', 'East', 'West', 'Central']
 DRUGS = ['Cardivex', 'Diabetrol', 'Oncozin', 'Neuraplex', 'Immunoboost']
 SPECIALTIES = ['Cardiologist', 'Endocrinologist', 'Oncologist', 'Neurologist', 'Immunologist']
 DRUG_SPECIALTY_MAP = {
