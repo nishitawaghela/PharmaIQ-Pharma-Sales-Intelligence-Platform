@@ -3,6 +3,7 @@ import numpy as np
 from faker import Faker
 import random
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 fake = Faker('en_IN')  # Indian locale
 random.seed(42)
@@ -53,7 +54,7 @@ def generate_sales_performance(reps_df, months=12):
         base_quota = random.randint(800000, 1500000)  # ₹8L to ₹15L per month
 
         for month in range(months):
-            date = start_date + timedelta(days=30 * month)
+            date = start_date + relativedelta(months=month)
 
             if performance_tier == 'high':
                 attainment = random.uniform(0.95, 1.30)
@@ -84,7 +85,7 @@ def generate_market_share(months=12):
     start_date = datetime(2024, 1, 1)
 
     for month in range(months):
-        date = start_date + timedelta(days=30 * month)
+        date = start_date + relativedelta(months=month)
         for region in REGIONS:
             for drug in DRUGS:
                 records.append({
