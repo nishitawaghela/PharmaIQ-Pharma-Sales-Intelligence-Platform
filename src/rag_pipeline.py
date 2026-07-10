@@ -25,7 +25,7 @@ class GeminiEmbeddings(Embeddings):
         embeddings = []
         for text in texts:
             result = genai.embed_content(
-                model="models/text-embedding-004",
+                model="models/gemini-embedding-001",  # changed
                 content=text,
                 task_type="retrieval_document"
             )
@@ -34,7 +34,7 @@ class GeminiEmbeddings(Embeddings):
 
     def embed_query(self, text):
         result = genai.embed_content(
-            model="models/text-embedding-004",
+            model="models/gemini-embedding-001",  # changed
             content=text,
             task_type="retrieval_query"
         )
