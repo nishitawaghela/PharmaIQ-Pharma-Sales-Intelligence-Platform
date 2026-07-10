@@ -133,7 +133,7 @@ def load_vectorstore():
 # ── Step 4: RAG Chain ─────────────────────────────────────────────
 def build_rag_chain(vectorstore):
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
+        model="gemini-2.0-flash",
         google_api_key=os.getenv('GEMINI_API_KEY'),
         temperature=0.1
     )
