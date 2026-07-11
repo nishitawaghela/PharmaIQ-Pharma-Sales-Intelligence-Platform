@@ -133,7 +133,7 @@ def load_vectorstore():
 # ── Step 4: RAG Chain ─────────────────────────────────────────────
 def build_rag_chain(vectorstore):
     llm = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash-lite",
         google_api_key=os.getenv('GEMINI_API_KEY'),
         temperature=0.1
     )
@@ -208,34 +208,13 @@ if __name__ == '__main__':
     print("Creating documents...")
     docs = create_documents(sales, reps, mkt)
 
-    print("Building vector store...")
-    vectorstore = build_vectorstore(docs)
+    # Only rebuild if index doesn't exist
+    if not os.path.exists("data/faiss_index"):
+        print("Building vector store...")
+        vectorstore = build_vectorstore(docs)
+    else:
+        print("Loading existing vector store...")
+        vectorstore = load_vectorstore()
 
     print("Building RAG chain...")
     chain = build_rag_chain(vectorstore)
-
-    # Test RAG
-    print("\n--- RAG TEST ---")
-    rag_questions = [
-        "Which region has the highest sales?",
-        "Who are the top performing sales reps?",
-        "Which drug has the lowest market share?"
-    ]
-    for q in rag_questions:
-        print(f"\nQ: {q}")
-        answer = chain.invoke(q)
-        print(f"A: {answer}")
-
-    # Test NL-to-SQL
-    print("\n--- NL-TO-SQL TEST ---")
-    nl_questions = [
-        "Show me all reps with average attainment below 80%",
-        "Which territory has the highest total sales?",
-        "Show me top 5 reps by total visits"
-    ]
-    for q in nl_questions:
-        print(f"\nQ: {q}")
-        sql = nl_to_sql(q)
-        print(f"SQL: {sql}")
-        result = run_sql(sql)
-        print(result.head())
