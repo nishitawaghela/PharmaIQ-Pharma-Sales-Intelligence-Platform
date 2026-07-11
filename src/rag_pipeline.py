@@ -23,7 +23,12 @@ groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
 
 # ── Custom Embeddings using Gemini ────────────────────────────────
 class GeminiEmbeddings(Embeddings):
+    def __init__(self):
+        self.api_key = os.getenv('GEMINI_API_KEY')
+    
     def embed_documents(self, texts):
+        import google.generativeai as genai
+        genai.configure(api_key=self.api_key)
         embeddings = []
         for text in texts:
             result = genai.embed_content(
@@ -35,6 +40,8 @@ class GeminiEmbeddings(Embeddings):
         return embeddings
 
     def embed_query(self, text):
+        import google.generativeai as genai
+        genai.configure(api_key=self.api_key)
         result = genai.embed_content(
             model="models/gemini-embedding-001",
             content=text,
