@@ -208,7 +208,6 @@ if __name__ == '__main__':
     print("Creating documents...")
     docs = create_documents(sales, reps, mkt)
 
-    # Only rebuild if index doesn't exist
     if not os.path.exists("data/faiss_index"):
         print("Building vector store...")
         vectorstore = build_vectorstore(docs)
@@ -218,3 +217,35 @@ if __name__ == '__main__':
 
     print("Building RAG chain...")
     chain = build_rag_chain(vectorstore)
+
+    print("\n" + "="*50)
+    print("PharmaIQ Sales Intelligence Assistant")
+    print("="*50)
+    print("Commands: 'rag' for AI answer, 'sql' for data query, 'quit' to exit")
+    print("="*50 + "\n")
+
+    while True:
+        mode = input("Mode (rag/sql): ").strip().lower()
+        
+        if mode == 'quit':
+            print("Goodbye!")
+            break
+        
+        question = input("Your question: ").strip()
+        
+        if mode == 'rag':
+            print("\nThinking...")
+            answer = chain.invoke(question)
+            print(f"\nAnswer: {answer}\n")
+        
+        elif mode == 'sql':
+            print("\nGenerating SQL...")
+            sql = nl_to_sql(question)
+            print(f"SQL: {sql}")
+            result = run_sql(sql)
+            print(f"\nResult:")
+            print(result.to_string())
+            print()
+        
+        else:
+            print("Invalid mode. Type 'rag', 'sql', or 'quit'\n")
