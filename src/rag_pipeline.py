@@ -144,11 +144,24 @@ def build_rag_chain(vectorstore):
 # ── Step 5: NL-to-SQL using Groq ─────────────────────────────────
 def nl_to_sql(question: str) -> str:
     schema = """
-    Tables:
-    - reps(rep_id, name, email, region, territory, drug_promoted, hire_date, manager)
-    - sales_performance(id, rep_id, month, quota, actual_sales, attainment_pct, drug, region, territory, new_doctors_reached, total_visits)
-    - market_share(id, month, region, drug, market_share_pct, total_prescriptions, competitor_share_pct)
-    - doctor_visits(id, rep_id, doctor_id, doctor_name, specialty, visit_date, drug_detailed, follow_up, prescription_generated)
+    Tables and their EXACT column names:
+
+    reps(rep_id, name, email, region, territory, drug_promoted, hire_date, manager)
+
+    sales_performance(id, rep_id, month, quota, actual_sales, attainment_pct, 
+                  drug, region, territory, new_doctors_reached, total_visits)
+    NOTE: in sales_performance, the drug column is called 'drug' NOT 'drug_promoted'
+
+    market_share(id, month, region, drug, market_share_pct, 
+             total_prescriptions, competitor_share_pct)
+
+    doctor_visits(id, rep_id, doctor_id, doctor_name, specialty, 
+              visit_date, drug_detailed, follow_up, prescription_generated)
+
+    IMPORTANT RULES:
+    - Use 'drug' column from sales_performance for drug-related queries on sales
+    - Use 'drug_promoted' from reps only for rep profile queries
+    - Always use exact column names as listed above
     """
 
     prompt = f"""You are a SQL expert. Convert this question to a PostgreSQL query.
