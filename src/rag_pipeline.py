@@ -1,53 +1,27 @@
 import os
-import json
-import numpy as np
 import pandas as pd
-import faiss
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
-import google.generativeai as genai
 from groq import Groq
 from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-from langchain_core.embeddings import Embeddings
 from langchain_groq import ChatGroq
 
 load_dotenv()
 
 engine = create_engine(os.getenv('DATABASE_URL'))
-genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
 
-# ── Custom Embeddings using Gemini ────────────────────────────────
-class GeminiEmbeddings(Embeddings):
-    def __init__(self):
-        self.api_key = os.getenv('GEMINI_API_KEY')
-    
-    def embed_documents(self, texts):
-        import google.generativeai as genai
-        genai.configure(api_key=self.api_key)
-        embeddings = []
-        for text in texts:
-            result = genai.embed_content(
-                model="models/gemini-embedding-001",
-                content=text,
-                task_type="retrieval_document"
-            )
-            embeddings.append(result['embedding'])
-        return embeddings
-
-    def embed_query(self, text):
-        import google.generativeai as genai
-        genai.configure(api_key=self.api_key)
-        result = genai.embed_content(
-            model="models/gemini-embedding-001",
-            content=text,
-            task_type="retrieval_query"
-        )
-        return result['embedding']
+# ── Embeddings (local, free, no API needed) ───────────────────────
+def get_embeddings():
+    return HuggingFaceEmbeddings(
+        model_name="all-MiniLM-L6-v2",
+        model_kwargs={'device': 'cpu'}
+    )
 
 # ── Step 1: Load data ─────────────────────────────────────────────
 def load_data():
@@ -120,15 +94,15 @@ def create_documents(sales, reps, mkt):
 
 # ── Step 3: Build FAISS vectorstore ──────────────────────────────
 def build_vectorstore(docs):
-    print("Building embeddings — this takes ~1 min...")
-    embeddings = GeminiEmbeddings()
+    print("Building embeddings...")
+    embeddings = get_embeddings()
     vectorstore = FAISS.from_documents(docs, embeddings)
     vectorstore.save_local("data/faiss_index")
     print(f"Vector store built with {len(docs)} documents")
     return vectorstore
 
 def load_vectorstore():
-    embeddings = GeminiEmbeddings()
+    embeddings = get_embeddings()
     return FAISS.load_local(
         "data/faiss_index",
         embeddings,
