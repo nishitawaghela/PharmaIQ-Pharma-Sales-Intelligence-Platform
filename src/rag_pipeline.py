@@ -112,7 +112,7 @@ def load_vectorstore():
 # ── Step 4: RAG Chain using Groq ─────────────────────────────────
 def build_rag_chain(vectorstore):
     llm = ChatGroq(
-        model="llama3-8b-8192",
+        model="llama-3.1-8b-instant",
         api_key=os.getenv('GROQ_API_KEY'),
         temperature=0.1
     )
@@ -165,7 +165,7 @@ Question: {question}
 SQL:"""
 
     response = groq_client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="llama-3.1-8b-instant",
         messages=[{"role": "user", "content": prompt}]
     )
     sql = response.choices[0].message.content.strip()
