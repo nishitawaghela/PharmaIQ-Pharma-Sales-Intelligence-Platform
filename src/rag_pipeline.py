@@ -6,26 +6,28 @@ import faiss
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 import google.generativeai as genai
-from langchain_google_genai import ChatGoogleGenerativeAI
+from groq import Groq
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.embeddings import Embeddings
+from langchain_groq import ChatGroq
 
 load_dotenv()
 
 engine = create_engine(os.getenv('DATABASE_URL'))
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
 
-# ── Custom Embeddings class using google-generativeai directly ────
+# ── Custom Embeddings using Gemini ────────────────────────────────
 class GeminiEmbeddings(Embeddings):
     def embed_documents(self, texts):
         embeddings = []
         for text in texts:
             result = genai.embed_content(
-                model="models/gemini-embedding-001",  # changed
+                model="models/gemini-embedding-001",
                 content=text,
                 task_type="retrieval_document"
             )
@@ -34,7 +36,7 @@ class GeminiEmbeddings(Embeddings):
 
     def embed_query(self, text):
         result = genai.embed_content(
-            model="models/gemini-embedding-001",  # changed
+            model="models/gemini-embedding-001",
             content=text,
             task_type="retrieval_query"
         )
@@ -51,7 +53,6 @@ def load_data():
 def create_documents(sales, reps, mkt):
     docs = []
 
-    # Rep performance summaries
     rep_summary = (sales.groupby('rep_id')
                    .agg(avg_attainment=('attainment_pct', 'mean'),
                         total_sales=('actual_sales', 'sum'),
@@ -72,7 +73,6 @@ def create_documents(sales, reps, mkt):
         Total Doctor Visits: {row['total_visits']}
         """))
 
-    # Regional summaries
     region_summary = (sales.groupby('region')
                       .agg(total_sales=('actual_sales', 'sum'),
                            avg_attainment=('attainment_pct', 'mean'))
@@ -85,7 +85,6 @@ def create_documents(sales, reps, mkt):
         Average Attainment: {row['avg_attainment']:.1f}%
         """))
 
-    # Drug summaries
     drug_summary = (sales.groupby('drug')
                     .agg(total_sales=('actual_sales', 'sum'),
                          avg_attainment=('attainment_pct', 'mean'))
@@ -98,7 +97,6 @@ def create_documents(sales, reps, mkt):
         Average Attainment: {row['avg_attainment']:.1f}%
         """))
 
-    # Market share summaries
     mkt_summary = (mkt.groupby(['drug','region'])
                    .agg(avg_market_share=('market_share_pct', 'mean'),
                         avg_prescriptions=('total_prescriptions', 'mean'))
@@ -130,11 +128,11 @@ def load_vectorstore():
         allow_dangerous_deserialization=True
     )
 
-# ── Step 4: RAG Chain ─────────────────────────────────────────────
+# ── Step 4: RAG Chain using Groq ─────────────────────────────────
 def build_rag_chain(vectorstore):
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash-lite",
-        google_api_key=os.getenv('GEMINI_API_KEY'),
+    llm = ChatGroq(
+        model="llama3-8b-8192",
+        api_key=os.getenv('GROQ_API_KEY'),
         temperature=0.1
     )
 
@@ -162,10 +160,8 @@ def build_rag_chain(vectorstore):
     )
     return chain
 
-# ── Step 5: NL-to-SQL ─────────────────────────────────────────────
+# ── Step 5: NL-to-SQL using Groq ─────────────────────────────────
 def nl_to_sql(question: str) -> str:
-    model = genai.GenerativeModel("gemini-1.5-flash")
-
     schema = """
     Tables:
     - reps(rep_id, name, email, region, territory, drug_promoted, hire_date, manager)
@@ -187,8 +183,11 @@ Rules:
 Question: {question}
 SQL:"""
 
-    response = model.generate_content(prompt)
-    sql = response.text.strip()
+    response = groq_client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    sql = response.choices[0].message.content.strip()
     sql = sql.replace('```sql', '').replace('```', '').strip()
     return sql
 
@@ -226,18 +225,18 @@ if __name__ == '__main__':
 
     while True:
         mode = input("Mode (rag/sql): ").strip().lower()
-        
+
         if mode == 'quit':
             print("Goodbye!")
             break
-        
+
         question = input("Your question: ").strip()
-        
+
         if mode == 'rag':
             print("\nThinking...")
             answer = chain.invoke(question)
             print(f"\nAnswer: {answer}\n")
-        
+
         elif mode == 'sql':
             print("\nGenerating SQL...")
             sql = nl_to_sql(question)
@@ -246,6 +245,6 @@ if __name__ == '__main__':
             print(f"\nResult:")
             print(result.to_string())
             print()
-        
+
         else:
             print("Invalid mode. Type 'rag', 'sql', or 'quit'\n")
