@@ -16,21 +16,26 @@ load_dotenv()
 
 app = FastAPI(title="PharmaIQ API", version="1.0")
 
-# ── Load everything on startup ────────────────────────────────────
-@app.on_event("startup")
-async def startup():
+from contextlib import asynccontextmanager
+
+chain = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     global chain
     print("Loading data...")
     sales, reps, mkt = load_data()
     docs = create_documents(sales, reps, mkt)
-
     if not os.path.exists("data/faiss_index"):
         vectorstore = build_vectorstore(docs)
     else:
         vectorstore = load_vectorstore()
-
     chain = build_rag_chain(vectorstore)
     print("PharmaIQ API ready")
+    yield
+
+app = FastAPI(title="PharmaIQ API", version="1.0", lifespan=lifespan)
+
 
 # ── Request/Response models ───────────────────────────────────────
 class QuestionRequest(BaseModel):
