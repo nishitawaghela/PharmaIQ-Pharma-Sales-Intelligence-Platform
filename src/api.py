@@ -14,28 +14,21 @@ from rag_pipeline import (
 
 load_dotenv()
 
+# ── Initialize on module load ─────────────────────────────────────
+print("Loading data...")
+sales, reps, mkt = load_data()
+docs = create_documents(sales, reps, mkt)
+
+if not os.path.exists("data/faiss_index"):
+    vectorstore = build_vectorstore(docs)
+else:
+    vectorstore = load_vectorstore()
+
+chain = build_rag_chain(vectorstore)
+print("PharmaIQ API ready")
+
+# ── FastAPI app ───────────────────────────────────────────────────
 app = FastAPI(title="PharmaIQ API", version="1.0")
-
-from contextlib import asynccontextmanager
-
-chain = None
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global chain
-    print("Loading data...")
-    sales, reps, mkt = load_data()
-    docs = create_documents(sales, reps, mkt)
-    if not os.path.exists("data/faiss_index"):
-        vectorstore = build_vectorstore(docs)
-    else:
-        vectorstore = load_vectorstore()
-    chain = build_rag_chain(vectorstore)
-    print("PharmaIQ API ready")
-    yield
-
-app = FastAPI(title="PharmaIQ API", version="1.0", lifespan=lifespan)
-
 
 # ── Request/Response models ───────────────────────────────────────
 class QuestionRequest(BaseModel):
@@ -54,6 +47,10 @@ class SQLResponse(BaseModel):
 @app.get("/")
 def root():
     return {"message": "PharmaIQ Sales Intelligence API", "status": "running"}
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
 
 @app.post("/rag", response_model=RAGResponse)
 async def rag_endpoint(request: QuestionRequest):
@@ -76,7 +73,3 @@ async def sql_endpoint(request: QuestionRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/health")
-def health():
-    return {"status": "healthy"}
