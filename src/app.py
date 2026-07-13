@@ -16,138 +16,135 @@ st.set_page_config(
 # ── Global styling ────────────────────────────────────────────────
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap');
 
     html, body, [class*="css"]  {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Source Sans 3', sans-serif;
     }
 
-    /* App background */
+    /* App background — soft neutral off-white */
     .stApp {
-        background: linear-gradient(180deg, #0F1226 0%, #171B3A 45%, #1F2547 100%);
-        color: #EDEBFF;
+        background: #F7F8F5;
+        color: #1F2A24;
     }
 
-    /* Hide default streamlit chrome */
     #MainMenu, footer, header {visibility: hidden;}
 
     /* Hero banner */
     .pharmaiq-hero {
-        background: linear-gradient(120deg, #7C3AED 0%, #DB2777 55%, #F59E0B 100%);
-        border-radius: 24px;
-        padding: 2.6rem 2.8rem;
+        background: #FFFFFF;
+        border: 1px solid #E3E8DF;
+        border-left: 6px solid #2F7A50;
+        border-radius: 16px;
+        padding: 2.2rem 2.4rem;
         margin-bottom: 1.6rem;
-        box-shadow: 0 20px 50px -20px rgba(124, 58, 237, 0.55);
-        position: relative;
-        overflow: hidden;
-    }
-    .pharmaiq-hero::after {
-        content: "";
-        position: absolute;
-        top: -60px; right: -60px;
-        width: 220px; height: 220px;
-        background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%);
-        border-radius: 50%;
     }
     .pharmaiq-hero h1 {
-        font-family: 'Sora', sans-serif;
+        font-family: 'Manrope', sans-serif;
         font-weight: 800;
-        font-size: 2.4rem;
-        color: white;
+        font-size: 2.1rem;
+        color: #1B4332;
         margin: 0 0 0.4rem 0;
-        letter-spacing: -0.5px;
+        letter-spacing: -0.3px;
     }
     .pharmaiq-hero p {
-        color: rgba(255,255,255,0.92);
-        font-size: 1.05rem;
+        color: #4A5A50;
+        font-size: 1.02rem;
         margin: 0;
         max-width: 640px;
     }
     .pharmaiq-badges {
-        margin-top: 1.1rem;
+        margin-top: 1rem;
         display: flex;
         gap: 0.5rem;
         flex-wrap: wrap;
     }
     .pharmaiq-badge {
-        background: rgba(255,255,255,0.18);
-        border: 1px solid rgba(255,255,255,0.35);
-        color: white;
-        padding: 0.3rem 0.8rem;
+        background: #EAF3EC;
+        border: 1px solid #CDE3D3;
+        color: #2F7A50;
+        padding: 0.28rem 0.75rem;
         border-radius: 999px;
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         font-weight: 600;
     }
 
-    /* Cards */
+    /* Card */
     .pharmaiq-card {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.09);
-        border-radius: 18px;
-        padding: 1.6rem 1.8rem;
-        backdrop-filter: blur(6px);
+        background: #FFFFFF;
+        border: 1px solid #E3E8DF;
+        border-radius: 16px;
+        padding: 1.5rem 1.7rem;
     }
 
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #12142B 0%, #1A1D3D 100%);
-        border-right: 1px solid rgba(255,255,255,0.06);
+        background: #FBFCF9;
+        border-right: 1px solid #E3E8DF;
     }
     section[data-testid="stSidebar"] * {
-        color: #E4E1FF !important;
+        color: #2A352F !important;
+    }
+    section[data-testid="stSidebar"] h3 {
+        color: #1B4332 !important;
+        font-family: 'Manrope', sans-serif;
     }
 
     .stTextInput input {
-        background: rgba(255,255,255,0.06) !important;
-        border: 1px solid rgba(255,255,255,0.15) !important;
-        border-radius: 12px !important;
-        color: #FFFFFF !important;
-        padding: 0.75rem 1rem !important;
+        background: #FFFFFF !important;
+        border: 1px solid #D3DCD0 !important;
+        border-radius: 10px !important;
+        color: #1F2A24 !important;
+        padding: 0.7rem 1rem !important;
         font-size: 1rem !important;
     }
-    .stTextInput input::placeholder { color: rgba(237,235,255,0.45) !important; }
+    .stTextInput input::placeholder { color: #8A968E !important; }
+    .stTextInput input:focus {
+        border-color: #2F7A50 !important;
+        box-shadow: 0 0 0 2px rgba(47,122,80,0.15) !important;
+    }
 
     div.stButton > button {
-        background: linear-gradient(120deg, #7C3AED, #DB2777);
+        background: #2F7A50;
         color: white;
         border: none;
-        border-radius: 12px;
-        padding: 0.7rem 1.6rem;
+        border-radius: 10px;
+        padding: 0.65rem 1.5rem;
         font-weight: 700;
         font-size: 0.95rem;
-        box-shadow: 0 10px 25px -10px rgba(219, 39, 119, 0.6);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        transition: background 0.15s ease, transform 0.15s ease;
     }
     div.stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 14px 30px -10px rgba(219, 39, 119, 0.75);
+        background: #26603F;
+        transform: translateY(-1px);
     }
 
-    /* Radio (mode selector) */
     div[role="radiogroup"] label {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
+        background: #FFFFFF;
+        border: 1px solid #E3E8DF;
         border-radius: 10px;
         padding: 0.5rem 0.8rem;
         margin-bottom: 0.4rem;
     }
 
-    h2, h3 { font-family: 'Sora', sans-serif; color: #F5F3FF; }
+    h2, h3 { font-family: 'Manrope', sans-serif; color: #1B4332; }
 
-    .stAlert { border-radius: 14px !important; }
+    .stAlert { border-radius: 12px !important; }
 
     [data-testid="stExpander"] {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 12px;
+        background: #FFFFFF;
+        border: 1px solid #E3E8DF;
+        border-radius: 10px;
     }
 
-    .stDataFrame { border-radius: 12px; overflow: hidden; }
+    .stDataFrame { border-radius: 10px; overflow: hidden; border: 1px solid #E3E8DF; }
 
-    footer-caption {
+    .footer-caption {
         text-align: center;
-        color: rgba(237,235,255,0.5);
+        color: #8A968E;
         font-size: 0.82rem;
     }
+
+    hr { border-color: #E3E8DF !important; }
 </style>
 """, unsafe_allow_html=True)
 
