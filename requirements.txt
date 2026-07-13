@@ -1,5 +1,6 @@
---extra-index-url https://download.pytorch.org/whl/cpu
+--index-url https://download.pytorch.org/whl/cpu
 torch
+--index-url https://pypi.org/simple
 pandas
 numpy
 psycopg2-binary
