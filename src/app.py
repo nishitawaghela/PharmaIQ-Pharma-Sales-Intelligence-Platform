@@ -2,7 +2,8 @@ import streamlit as st
 import requests
 import pandas as pd
 
-API_URL = "http://localhost:8000"
+import os
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 # ── Page config ───────────────────────────────────────────────────
 st.set_page_config(
