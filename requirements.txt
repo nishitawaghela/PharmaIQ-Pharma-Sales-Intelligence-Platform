@@ -1,5 +1,4 @@
 --index-url https://download.pytorch.org/whl/cpu
-torch
 --index-url https://pypi.org/simple
 pandas
 numpy
@@ -19,6 +18,6 @@ langchain
 langchain-core
 langchain-community
 langchain-groq
-sentence-transformers
 faiss-cpu
 pydantic
+fastembed

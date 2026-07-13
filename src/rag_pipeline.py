@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from groq import Groq
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
@@ -18,10 +18,7 @@ groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
 
 # ── Embeddings (local, free, no API needed) ───────────────────────
 def get_embeddings():
-    return HuggingFaceEmbeddings(
-        model_name="all-MiniLM-L6-v2",
-        model_kwargs={'device': 'cpu'}
-    )
+    return FastEmbedEmbeddings()
 
 # ── Step 1: Load data ─────────────────────────────────────────────
 def load_data():
