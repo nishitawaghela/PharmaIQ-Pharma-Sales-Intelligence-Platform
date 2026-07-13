@@ -12,3 +12,4 @@ langchain
 langchain-openai
 faiss-cpu
 streamlit
+groq
